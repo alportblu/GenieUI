@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 17, 24, 39;
+  --background-end-rgb: 31, 41, 55;
+  --dev-tools-button-display: none !important;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
+}
+
+/* Ocultar completamente as ferramentas de desenvolvimento do Next.js */
+#__next-dev-tools,
+#__next_dev_root,
+[id^="__next-"],
+[data-next-dev-tool-button],
+[data-testid^="__next-dev-tools-"],
+[data-next-dev-tool="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+/* Estilo para esconder o indicador do Next.js */
+:root #__next-build-watcher {
+  display: none !important;
+}
+
+/* Estilo para reposicionar e minimizar o indicador do Next.js */
+div[data-nextjs-dialog-overlay] {
+  display: none !important;
+}
+
+div[data-nextjs-dialog],
+div[data-nextjs-toast] {
+  right: auto !important;
+  bottom: auto !important;
+  top: 10px !important;
+  left: 10px !important;
+  transform: scale(0.6) !important;
+  transform-origin: top left !important;
+  z-index: 100000 !important;
+  opacity: 0.7 !important;
+}
+
+div[data-nextjs-toast]:hover {
+  opacity: 1 !important;
+}
+
+/* Esconder completamente o indicador quando não houver erros */
+div[data-nextjs-toast][data-severity="error"] {
+  display: flex !important; 
+}
+
+div[data-nextjs-toast]:not([data-severity="error"]) {
+  display: none !important;
+}
+
+/* Garantir que o botão de enviar mensagem esteja acessível */
+#chat-submit-button,
+button[type="submit"],
+form button:last-child {
+  z-index: 100001 !important;
+} 

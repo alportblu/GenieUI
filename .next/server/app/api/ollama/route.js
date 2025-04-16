@@ -1,0 +1,122 @@
+/*
+ * ATTENTION: An "eval-source-map" devtool has been used.
+ * This devtool is neither made for production nor for readable output files.
+ * It uses "eval()" calls to create a separate source file with attached SourceMaps in the browser devtools.
+ * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
+ * or disable the default devtool with "devtool: false".
+ * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
+ */
+(() => {
+var exports = {};
+exports.id = "app/api/ollama/route";
+exports.ids = ["app/api/ollama/route"];
+exports.modules = {
+
+/***/ "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-app-loader/index.js?name=app%2Fapi%2Follama%2Froute&page=%2Fapi%2Follama%2Froute&appPaths=&pagePath=private-next-app-dir%2Fapi%2Follama%2Froute.ts&appDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama%2Fsrc%2Fapp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D!":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/next/dist/build/webpack/loaders/next-app-loader/index.js?name=app%2Fapi%2Follama%2Froute&page=%2Fapi%2Follama%2Froute&appPaths=&pagePath=private-next-app-dir%2Fapi%2Follama%2Froute.ts&appDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama%2Fsrc%2Fapp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D! ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   patchFetch: () => (/* binding */ patchFetch),\n/* harmony export */   routeModule: () => (/* binding */ routeModule),\n/* harmony export */   serverHooks: () => (/* binding */ serverHooks),\n/* harmony export */   workAsyncStorage: () => (/* binding */ workAsyncStorage),\n/* harmony export */   workUnitAsyncStorage: () => (/* binding */ workUnitAsyncStorage)\n/* harmony export */ });\n/* harmony import */ var next_dist_server_route_modules_app_route_module_compiled__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! next/dist/server/route-modules/app-route/module.compiled */ \"(rsc)/./node_modules/next/dist/server/route-modules/app-route/module.compiled.js\");\n/* harmony import */ var next_dist_server_route_modules_app_route_module_compiled__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(next_dist_server_route_modules_app_route_module_compiled__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var next_dist_server_route_kind__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! next/dist/server/route-kind */ \"(rsc)/./node_modules/next/dist/server/route-kind.js\");\n/* harmony import */ var next_dist_server_lib_patch_fetch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! next/dist/server/lib/patch-fetch */ \"(rsc)/./node_modules/next/dist/server/lib/patch-fetch.js\");\n/* harmony import */ var next_dist_server_lib_patch_fetch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(next_dist_server_lib_patch_fetch__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var _Users_bonetti_Documents_Projects_LocalOllama_src_app_api_ollama_route_ts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./src/app/api/ollama/route.ts */ \"(rsc)/./src/app/api/ollama/route.ts\");\n\n\n\n\n// We inject the nextConfigOutput here so that we can use them in the route\n// module.\nconst nextConfigOutput = \"\"\nconst routeModule = new next_dist_server_route_modules_app_route_module_compiled__WEBPACK_IMPORTED_MODULE_0__.AppRouteRouteModule({\n    definition: {\n        kind: next_dist_server_route_kind__WEBPACK_IMPORTED_MODULE_1__.RouteKind.APP_ROUTE,\n        page: \"/api/ollama/route\",\n        pathname: \"/api/ollama\",\n        filename: \"route\",\n        bundlePath: \"app/api/ollama/route\"\n    },\n    resolvedPagePath: \"/Users/bonetti/Documents/Projects/LocalOllama/src/app/api/ollama/route.ts\",\n    nextConfigOutput,\n    userland: _Users_bonetti_Documents_Projects_LocalOllama_src_app_api_ollama_route_ts__WEBPACK_IMPORTED_MODULE_3__\n});\n// Pull out the exports that we need to expose from the module. This should\n// be eliminated when we've moved the other routes to the new format. These\n// are used to hook into the route.\nconst { workAsyncStorage, workUnitAsyncStorage, serverHooks } = routeModule;\nfunction patchFetch() {\n    return (0,next_dist_server_lib_patch_fetch__WEBPACK_IMPORTED_MODULE_2__.patchFetch)({\n        workAsyncStorage,\n        workUnitAsyncStorage\n    });\n}\n\n\n//# sourceMappingURL=app-route.js.map//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi9ub2RlX21vZHVsZXMvbmV4dC9kaXN0L2J1aWxkL3dlYnBhY2svbG9hZGVycy9uZXh0LWFwcC1sb2FkZXIvaW5kZXguanM/bmFtZT1hcHAlMkZhcGklMkZvbGxhbWElMkZyb3V0ZSZwYWdlPSUyRmFwaSUyRm9sbGFtYSUyRnJvdXRlJmFwcFBhdGhzPSZwYWdlUGF0aD1wcml2YXRlLW5leHQtYXBwLWRpciUyRmFwaSUyRm9sbGFtYSUyRnJvdXRlLnRzJmFwcERpcj0lMkZVc2VycyUyRmJvbmV0dGklMkZEb2N1bWVudHMlMkZQcm9qZWN0cyUyRkxvY2FsT2xsYW1hJTJGc3JjJTJGYXBwJnBhZ2VFeHRlbnNpb25zPXRzeCZwYWdlRXh0ZW5zaW9ucz10cyZwYWdlRXh0ZW5zaW9ucz1qc3gmcGFnZUV4dGVuc2lvbnM9anMmcm9vdERpcj0lMkZVc2VycyUyRmJvbmV0dGklMkZEb2N1bWVudHMlMkZQcm9qZWN0cyUyRkxvY2FsT2xsYW1hJmlzRGV2PXRydWUmdHNjb25maWdQYXRoPXRzY29uZmlnLmpzb24mYmFzZVBhdGg9JmFzc2V0UHJlZml4PSZuZXh0Q29uZmlnT3V0cHV0PSZwcmVmZXJyZWRSZWdpb249Jm1pZGRsZXdhcmVDb25maWc9ZTMwJTNEISIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7OztBQUErRjtBQUN2QztBQUNxQjtBQUN5QjtBQUN0RztBQUNBO0FBQ0E7QUFDQSx3QkFBd0IseUdBQW1CO0FBQzNDO0FBQ0EsY0FBYyxrRUFBUztBQUN2QjtBQUNBO0FBQ0E7QUFDQTtBQUNBLEtBQUs7QUFDTDtBQUNBO0FBQ0EsWUFBWTtBQUNaLENBQUM7QUFDRDtBQUNBO0FBQ0E7QUFDQSxRQUFRLHNEQUFzRDtBQUM5RDtBQUNBLFdBQVcsNEVBQVc7QUFDdEI7QUFDQTtBQUNBLEtBQUs7QUFDTDtBQUMwRjs7QUFFMUYiLCJzb3VyY2VzIjpbIiJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBBcHBSb3V0ZVJvdXRlTW9kdWxlIH0gZnJvbSBcIm5leHQvZGlzdC9zZXJ2ZXIvcm91dGUtbW9kdWxlcy9hcHAtcm91dGUvbW9kdWxlLmNvbXBpbGVkXCI7XG5pbXBvcnQgeyBSb3V0ZUtpbmQgfSBmcm9tIFwibmV4dC9kaXN0L3NlcnZlci9yb3V0ZS1raW5kXCI7XG5pbXBvcnQgeyBwYXRjaEZldGNoIGFzIF9wYXRjaEZldGNoIH0gZnJvbSBcIm5leHQvZGlzdC9zZXJ2ZXIvbGliL3BhdGNoLWZldGNoXCI7XG5pbXBvcnQgKiBhcyB1c2VybGFuZCBmcm9tIFwiL1VzZXJzL2JvbmV0dGkvRG9jdW1lbnRzL1Byb2plY3RzL0xvY2FsT2xsYW1hL3NyYy9hcHAvYXBpL29sbGFtYS9yb3V0ZS50c1wiO1xuLy8gV2UgaW5qZWN0IHRoZSBuZXh0Q29uZmlnT3V0cHV0IGhlcmUgc28gdGhhdCB3ZSBjYW4gdXNlIHRoZW0gaW4gdGhlIHJvdXRlXG4vLyBtb2R1bGUuXG5jb25zdCBuZXh0Q29uZmlnT3V0cHV0ID0gXCJcIlxuY29uc3Qgcm91dGVNb2R1bGUgPSBuZXcgQXBwUm91dGVSb3V0ZU1vZHVsZSh7XG4gICAgZGVmaW5pdGlvbjoge1xuICAgICAgICBraW5kOiBSb3V0ZUtpbmQuQVBQX1JPVVRFLFxuICAgICAgICBwYWdlOiBcIi9hcGkvb2xsYW1hL3JvdXRlXCIsXG4gICAgICAgIHBhdGhuYW1lOiBcIi9hcGkvb2xsYW1hXCIsXG4gICAgICAgIGZpbGVuYW1lOiBcInJvdXRlXCIsXG4gICAgICAgIGJ1bmRsZVBhdGg6IFwiYXBwL2FwaS9vbGxhbWEvcm91dGVcIlxuICAgIH0sXG4gICAgcmVzb2x2ZWRQYWdlUGF0aDogXCIvVXNlcnMvYm9uZXR0aS9Eb2N1bWVudHMvUHJvamVjdHMvTG9jYWxPbGxhbWEvc3JjL2FwcC9hcGkvb2xsYW1hL3JvdXRlLnRzXCIsXG4gICAgbmV4dENvbmZpZ091dHB1dCxcbiAgICB1c2VybGFuZFxufSk7XG4vLyBQdWxsIG91dCB0aGUgZXhwb3J0cyB0aGF0IHdlIG5lZWQgdG8gZXhwb3NlIGZyb20gdGhlIG1vZHVsZS4gVGhpcyBzaG91bGRcbi8vIGJlIGVsaW1pbmF0ZWQgd2hlbiB3ZSd2ZSBtb3ZlZCB0aGUgb3RoZXIgcm91dGVzIHRvIHRoZSBuZXcgZm9ybWF0LiBUaGVzZVxuLy8gYXJlIHVzZWQgdG8gaG9vayBpbnRvIHRoZSByb3V0ZS5cbmNvbnN0IHsgd29ya0FzeW5jU3RvcmFnZSwgd29ya1VuaXRBc3luY1N0b3JhZ2UsIHNlcnZlckhvb2tzIH0gPSByb3V0ZU1vZHVsZTtcbmZ1bmN0aW9uIHBhdGNoRmV0Y2goKSB7XG4gICAgcmV0dXJuIF9wYXRjaEZldGNoKHtcbiAgICAgICAgd29ya0FzeW5jU3RvcmFnZSxcbiAgICAgICAgd29ya1VuaXRBc3luY1N0b3JhZ2VcbiAgICB9KTtcbn1cbmV4cG9ydCB7IHJvdXRlTW9kdWxlLCB3b3JrQXN5bmNTdG9yYWdlLCB3b3JrVW5pdEFzeW5jU3RvcmFnZSwgc2VydmVySG9va3MsIHBhdGNoRmV0Y2gsICB9O1xuXG4vLyMgc291cmNlTWFwcGluZ1VSTD1hcHAtcm91dGUuanMubWFwIl0sIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(rsc)/./node_modules/next/dist/build/webpack/loaders/next-app-loader/index.js?name=app%2Fapi%2Follama%2Froute&page=%2Fapi%2Follama%2Froute&appPaths=&pagePath=private-next-app-dir%2Fapi%2Follama%2Froute.ts&appDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama%2Fsrc%2Fapp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D!\n");
+
+/***/ }),
+
+/***/ "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=true!":
+/*!******************************************************************************************************!*\
+  !*** ./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=true! ***!
+  \******************************************************************************************************/
+/***/ (() => {
+
+
+
+/***/ }),
+
+/***/ "(rsc)/./src/app/api/ollama/route.ts":
+/*!*************************************!*\
+  !*** ./src/app/api/ollama/route.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   GET: () => (/* binding */ GET),\n/* harmony export */   POST: () => (/* binding */ POST)\n/* harmony export */ });\n/* harmony import */ var next_server__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! next/server */ \"(rsc)/./node_modules/next/dist/api/server.js\");\n\nasync function GET(request) {\n    const { searchParams } = new URL(request.url);\n    const endpoint = searchParams.get('endpoint');\n    if (!endpoint) {\n        return next_server__WEBPACK_IMPORTED_MODULE_0__.NextResponse.json({\n            error: 'No endpoint provided'\n        }, {\n            status: 400\n        });\n    }\n    try {\n        const response = await fetch(endpoint);\n        const data = await response.json();\n        return next_server__WEBPACK_IMPORTED_MODULE_0__.NextResponse.json(data);\n    } catch (error) {\n        console.error('Proxy error:', error);\n        return next_server__WEBPACK_IMPORTED_MODULE_0__.NextResponse.json({\n            error: 'Failed to fetch from Ollama'\n        }, {\n            status: 500\n        });\n    }\n}\nasync function POST(request) {\n    const { searchParams } = new URL(request.url);\n    const endpoint = searchParams.get('endpoint');\n    if (!endpoint) {\n        return next_server__WEBPACK_IMPORTED_MODULE_0__.NextResponse.json({\n            error: 'No endpoint provided'\n        }, {\n            status: 400\n        });\n    }\n    try {\n        const body = await request.json();\n        const ollamaResponse = await fetch(endpoint, {\n            method: 'POST',\n            headers: {\n                'Content-Type': 'application/json'\n            },\n            body: JSON.stringify(body)\n        });\n        if (!ollamaResponse.ok) {\n            throw new Error('Failed to fetch from Ollama');\n        }\n        // If streaming is requested, stream the response\n        if (body.stream) {\n            const encoder = new TextEncoder();\n            const decoder = new TextDecoder();\n            const stream = new ReadableStream({\n                async start (controller) {\n                    try {\n                        const reader = ollamaResponse.body?.getReader();\n                        if (!reader) throw new Error('No reader available');\n                        while(true){\n                            const { done, value } = await reader.read();\n                            if (done) break;\n                            const chunk = decoder.decode(value);\n                            controller.enqueue(encoder.encode(chunk));\n                        }\n                        controller.close();\n                    } catch (error) {\n                        controller.error(error);\n                    }\n                }\n            });\n            return new Response(stream, {\n                headers: {\n                    'Content-Type': 'text/event-stream',\n                    'Cache-Control': 'no-cache',\n                    'Connection': 'keep-alive'\n                }\n            });\n        }\n        // If not streaming, return the full response\n        const data = await ollamaResponse.json();\n        return next_server__WEBPACK_IMPORTED_MODULE_0__.NextResponse.json(data);\n    } catch (error) {\n        console.error('Proxy error:', error);\n        return next_server__WEBPACK_IMPORTED_MODULE_0__.NextResponse.json({\n            error: 'Failed to post to Ollama'\n        }, {\n            status: 500\n        });\n    }\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,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dHRpL0RvY3VtZW50cy9Qcm9qZWN0cy9Mb2NhbE9sbGFtYS9zcmMvYXBwL2FwaS9vbGxhbWEvcm91dGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTmV4dFJlc3BvbnNlIH0gZnJvbSAnbmV4dC9zZXJ2ZXInXG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBHRVQocmVxdWVzdDogUmVxdWVzdCkge1xuICBjb25zdCB7IHNlYXJjaFBhcmFtcyB9ID0gbmV3IFVSTChyZXF1ZXN0LnVybClcbiAgY29uc3QgZW5kcG9pbnQgPSBzZWFyY2hQYXJhbXMuZ2V0KCdlbmRwb2ludCcpXG4gIFxuICBpZiAoIWVuZHBvaW50KSB7XG4gICAgcmV0dXJuIE5leHRSZXNwb25zZS5qc29uKHsgZXJyb3I6ICdObyBlbmRwb2ludCBwcm92aWRlZCcgfSwgeyBzdGF0dXM6IDQwMCB9KVxuICB9XG5cbiAgdHJ5IHtcbiAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGZldGNoKGVuZHBvaW50KVxuICAgIGNvbnN0IGRhdGEgPSBhd2FpdCByZXNwb25zZS5qc29uKClcbiAgICByZXR1cm4gTmV4dFJlc3BvbnNlLmpzb24oZGF0YSlcbiAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICBjb25zb2xlLmVycm9yKCdQcm94eSBlcnJvcjonLCBlcnJvcilcbiAgICByZXR1cm4gTmV4dFJlc3BvbnNlLmpzb24oXG4gICAgICB7IGVycm9yOiAnRmFpbGVkIHRvIGZldGNoIGZyb20gT2xsYW1hJyB9LFxuICAgICAgeyBzdGF0dXM6IDUwMCB9XG4gICAgKVxuICB9XG59XG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBQT1NUKHJlcXVlc3Q6IFJlcXVlc3QpIHtcbiAgY29uc3QgeyBzZWFyY2hQYXJhbXMgfSA9IG5ldyBVUkwocmVxdWVzdC51cmwpXG4gIGNvbnN0IGVuZHBvaW50ID0gc2VhcmNoUGFyYW1zLmdldCgnZW5kcG9pbnQnKVxuICBcbiAgaWYgKCFlbmRwb2ludCkge1xuICAgIHJldHVybiBOZXh0UmVzcG9uc2UuanNvbih7IGVycm9yOiAnTm8gZW5kcG9pbnQgcHJvdmlkZWQnIH0sIHsgc3RhdHVzOiA0MDAgfSlcbiAgfVxuXG4gIHRyeSB7XG4gICAgY29uc3QgYm9keSA9IGF3YWl0IHJlcXVlc3QuanNvbigpXG4gICAgY29uc3Qgb2xsYW1hUmVzcG9uc2UgPSBhd2FpdCBmZXRjaChlbmRwb2ludCwge1xuICAgICAgbWV0aG9kOiAnUE9TVCcsXG4gICAgICBoZWFkZXJzOiB7XG4gICAgICAgICdDb250ZW50LVR5cGUnOiAnYXBwbGljYXRpb24vanNvbicsXG4gICAgICB9LFxuICAgICAgYm9keTogSlNPTi5zdHJpbmdpZnkoYm9keSksXG4gICAgfSlcblxuICAgIGlmICghb2xsYW1hUmVzcG9uc2Uub2spIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignRmFpbGVkIHRvIGZldGNoIGZyb20gT2xsYW1hJylcbiAgICB9XG5cbiAgICAvLyBJZiBzdHJlYW1pbmcgaXMgcmVxdWVzdGVkLCBzdHJlYW0gdGhlIHJlc3BvbnNlXG4gICAgaWYgKGJvZHkuc3RyZWFtKSB7XG4gICAgICBjb25zdCBlbmNvZGVyID0gbmV3IFRleHRFbmNvZGVyKClcbiAgICAgIGNvbnN0IGRlY29kZXIgPSBuZXcgVGV4dERlY29kZXIoKVxuXG4gICAgICBjb25zdCBzdHJlYW0gPSBuZXcgUmVhZGFibGVTdHJlYW0oe1xuICAgICAgICBhc3luYyBzdGFydChjb250cm9sbGVyKSB7XG4gICAgICAgICAgdHJ5IHtcbiAgICAgICAgICAgIGNvbnN0IHJlYWRlciA9IG9sbGFtYVJlc3BvbnNlLmJvZHk/LmdldFJlYWRlcigpXG4gICAgICAgICAgICBpZiAoIXJlYWRlcikgdGhyb3cgbmV3IEVycm9yKCdObyByZWFkZXIgYXZhaWxhYmxlJylcblxuICAgICAgICAgICAgd2hpbGUgKHRydWUpIHtcbiAgICAgICAgICAgICAgY29uc3QgeyBkb25lLCB2YWx1ZSB9ID0gYXdhaXQgcmVhZGVyLnJlYWQoKVxuICAgICAgICAgICAgICBpZiAoZG9uZSkgYnJlYWtcblxuICAgICAgICAgICAgICBjb25zdCBjaHVuayA9IGRlY29kZXIuZGVjb2RlKHZhbHVlKVxuICAgICAgICAgICAgICBjb250cm9sbGVyLmVucXVldWUoZW5jb2Rlci5lbmNvZGUoY2h1bmspKVxuICAgICAgICAgICAgfVxuICAgICAgICAgICAgY29udHJvbGxlci5jbG9zZSgpXG4gICAgICAgICAgfSBjYXRjaCAoZXJyb3IpIHtcbiAgICAgICAgICAgIGNvbnRyb2xsZXIuZXJyb3IoZXJyb3IpXG4gICAgICAgICAgfVxuICAgICAgICB9LFxuICAgICAgfSlcblxuICAgICAgcmV0dXJuIG5ldyBSZXNwb25zZShzdHJlYW0sIHtcbiAgICAgICAgaGVhZGVyczoge1xuICAgICAgICAgICdDb250ZW50LVR5cGUnOiAndGV4dC9ldmVudC1zdHJlYW0nLFxuICAgICAgICAgICdDYWNoZS1Db250cm9sJzogJ25vLWNhY2hlJyxcbiAgICAgICAgICAnQ29ubmVjdGlvbic6ICdrZWVwLWFsaXZlJyxcbiAgICAgICAgfSxcbiAgICAgIH0pXG4gICAgfVxuXG4gICAgLy8gSWYgbm90IHN0cmVhbWluZywgcmV0dXJuIHRoZSBmdWxsIHJlc3BvbnNlXG4gICAgY29uc3QgZGF0YSA9IGF3YWl0IG9sbGFtYVJlc3BvbnNlLmpzb24oKVxuICAgIHJldHVybiBOZXh0UmVzcG9uc2UuanNvbihkYXRhKVxuICB9IGNhdGNoIChlcnJvcikge1xuICAgIGNvbnNvbGUuZXJyb3IoJ1Byb3h5IGVycm9yOicsIGVycm9yKVxuICAgIHJldHVybiBOZXh0UmVzcG9uc2UuanNvbihcbiAgICAgIHsgZXJyb3I6ICdGYWlsZWQgdG8gcG9zdCB0byBPbGxhbWEnIH0sXG4gICAgICB7IHN0YXR1czogNTAwIH1cbiAgICApXG4gIH1cbn0gIl0sIm5hbWVzIjpbIk5leHRSZXNwb25zZSIsIkdFVCIsInJlcXVlc3QiLCJzZWFyY2hQYXJhbXMiLCJVUkwiLCJ1cmwiLCJlbmRwb2ludCIsImdldCIsImpzb24iLCJlcnJvciIsInN0YXR1cyIsInJlc3BvbnNlIiwiZmV0Y2giLCJkYXRhIiwiY29uc29sZSIsIlBPU1QiLCJib2R5Iiwib2xsYW1hUmVzcG9uc2UiLCJtZXRob2QiLCJoZWFkZXJzIiwiSlNPTiIsInN0cmluZ2lmeSIsIm9rIiwiRXJyb3IiLCJzdHJlYW0iLCJlbmNvZGVyIiwiVGV4dEVuY29kZXIiLCJkZWNvZGVyIiwiVGV4dERlY29kZXIiLCJSZWFkYWJsZVN0cmVhbSIsInN0YXJ0IiwiY29udHJvbGxlciIsInJlYWRlciIsImdldFJlYWRlciIsImRvbmUiLCJ2YWx1ZSIsInJlYWQiLCJjaHVuayIsImRlY29kZSIsImVucXVldWUiLCJlbmNvZGUiLCJjbG9zZSIsIlJlc3BvbnNlIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///(rsc)/./src/app/api/ollama/route.ts\n");
+
+/***/ }),
+
+/***/ "(ssr)/./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=true!":
+/*!******************************************************************************************************!*\
+  !*** ./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=true! ***!
+  \******************************************************************************************************/
+/***/ (() => {
+
+
+
+/***/ }),
+
+/***/ "../app-render/after-task-async-storage.external":
+/*!***********************************************************************************!*\
+  !*** external "next/dist/server/app-render/after-task-async-storage.external.js" ***!
+  \***********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("next/dist/server/app-render/after-task-async-storage.external.js");
+
+/***/ }),
+
+/***/ "../app-render/work-async-storage.external":
+/*!*****************************************************************************!*\
+  !*** external "next/dist/server/app-render/work-async-storage.external.js" ***!
+  \*****************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("next/dist/server/app-render/work-async-storage.external.js");
+
+/***/ }),
+
+/***/ "./work-unit-async-storage.external":
+/*!**********************************************************************************!*\
+  !*** external "next/dist/server/app-render/work-unit-async-storage.external.js" ***!
+  \**********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("next/dist/server/app-render/work-unit-async-storage.external.js");
+
+/***/ }),
+
+/***/ "next/dist/compiled/next-server/app-page.runtime.dev.js":
+/*!*************************************************************************!*\
+  !*** external "next/dist/compiled/next-server/app-page.runtime.dev.js" ***!
+  \*************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("next/dist/compiled/next-server/app-page.runtime.dev.js");
+
+/***/ }),
+
+/***/ "next/dist/compiled/next-server/app-route.runtime.dev.js":
+/*!**************************************************************************!*\
+  !*** external "next/dist/compiled/next-server/app-route.runtime.dev.js" ***!
+  \**************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("next/dist/compiled/next-server/app-route.runtime.dev.js");
+
+/***/ })
+
+};
+;
+
+// load runtime
+var __webpack_require__ = require("../../../webpack-runtime.js");
+__webpack_require__.C(exports);
+var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
+var __webpack_exports__ = __webpack_require__.X(0, ["vendor-chunks/next"], () => (__webpack_exec__("(rsc)/./node_modules/next/dist/build/webpack/loaders/next-app-loader/index.js?name=app%2Fapi%2Follama%2Froute&page=%2Fapi%2Follama%2Froute&appPaths=&pagePath=private-next-app-dir%2Fapi%2Follama%2Froute.ts&appDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama%2Fsrc%2Fapp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=%2FUsers%2Fbonetti%2FDocuments%2FProjects%2FLocalOllama&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=&preferredRegion=&middlewareConfig=e30%3D!")));
+module.exports = __webpack_exports__;
+
+})();

@@ -1,0 +1,53 @@
+/* Estilos específicos para dispositivos móveis */
+
+/* Indicadores do Next.js */
+@media (max-width: 768px) {
+  /* Remover completamente o indicador em dispositivos móveis */
+  [data-nextjs-toast],
+  [data-nextjs-dialog],
+  [data-nextjs-dialog-overlay],
+  div[role="dialog"][tabindex="-1"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    transform: scale(0) !important;
+  }
+  
+  /* Esconder botões que podem ser da interface do Next.js */
+  button:not([type]),
+  button:has(> div > span),
+  button:has(span:only-child):not([class]),
+  button[class*="next"] {
+    display: none !important;
+  }
+  
+  /* Garantir que o botão de enviar mensagem e ícones importantes não sejam afetados */
+  #sendButton,
+  form button[type="submit"],
+  button.chat-button,
+  button[aria-label*="Send"],
+  button[aria-label*="Attach"],
+  button[aria-label*="Upload"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 1000 !important;
+  }
+  
+  /* Sobreposição para esconder o indicador N específico do Next.js */
+  .n-button-overlay {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    z-index: 99999;
+    pointer-events: none;
+  }
+} 
