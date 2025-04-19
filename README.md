@@ -30,7 +30,6 @@ GenieUI/
 │   ├── lib/                # Utility functions and API integrations
 │   └── tests/              # Unit and integration tests
 ├── .env.example            # Sample environment variables
-├── .gitignore              # Git ignore rules
 ├── next.config.js          # Next.js configuration
 ├── tailwind.config.js      # Tailwind CSS configuration
 └── README.md               # Project documentation
