@@ -1,94 +1,127 @@
-# Local AI Assistant
+GenieUI
 
-A modern web interface for interacting with various AI models, including local Ollama models and cloud providers like OpenAI, Anthropic, and Google.
+GenieUI is a modern, AI-powered web interface designed to streamline interactions with various AI models, including OpenAI, Anthropic, Groq, and Google. Built with Next.js and TypeScript, it offers a seamless user experience for developers and end-users alike.
 
-## Features
+🚀 Features
+Multi-Model Support: Integrates with multiple AI providers for versatile AI interactions.
 
-- 🤖 Support for multiple AI models:
-  - Local Ollama models (Llama 2, CodeLlama, Mistral, etc.)
-  - OpenAI GPT models
-  - Anthropic Claude models
-  - Google Gemini models
-- 📁 File upload support for various formats:
-  - Documents (PDF, Word, Excel)
-  - Archives (ZIP)
-  - Images
-  - Text files
-- 💻 Local system interaction capabilities
-- 🎨 Beautiful, modern, and responsive UI
-- 🔒 Secure API key management
-- 📝 Code block highlighting and easy copying
+Modular Architecture: Clean and maintainable codebase with a focus on scalability.
 
-## Prerequisites
+Responsive Design: Optimized for various devices to ensure accessibility.
 
-- Node.js 18.0.0 or higher
-- npm 9.0.0 or higher
-- Ollama (optional, for local models)
+API Routes: Dedicated API routes for each AI provider to handle requests efficiently.
 
-## Quick Start
+Context Management: Utilizes React Context for state management across components.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/local-ai-assistant.git
-   cd local-ai-assistant
-   ```
+Testing: Includes unit tests to ensure component reliability.​
+GitHub
 
-2. Choose your platform's startup script:
+🛠️ Technologies Used
+Framework: Next.js
 
-   - **Windows**: Double-click `scripts/start.bat`
-   - **macOS**: Double-click `scripts/start.command`
-   - **Linux**: Run `./scripts/start.sh`
+Language: TypeScript
 
-The script will:
-- Install dependencies (if needed)
-- Build the project
-- Start the server
+Styling: Tailwind CSS
 
-3. Open your browser and navigate to:
-   ```
-   http://localhost:3000
-   ```
+Testing: Jest, React Testing Library
 
-## Configuration
+API Integration: Axios​
 
-1. **Ollama Setup**
-   - Install Ollama from [ollama.ai](https://ollama.ai)
-   - Pull your desired models using `ollama pull model-name`
-   - The default endpoint is `http://localhost:11434`
+📂 Project Structure
+bash
+Copy
+Edit
+GenieUI/
+├── public/                 # Static assets
+├── src/
+│   ├── app/                # Next.js pages and layouts
+│   ├── components/         # Reusable UI components
+│   ├── lib/                # Utility functions and API integrations
+│   └── tests/              # Unit and integration tests
+├── .env.example            # Sample environment variables
+├── .gitignore              # Git ignore rules
+├── next.config.js          # Next.js configuration
+├── tailwind.config.js      # Tailwind CSS configuration
+└── README.md               # Project documentation
+⚙️ Getting Started
+Prerequisites
+Node.js (v14 or later)
 
-2. **API Keys (Optional)**
-   - OpenAI: Get your API key from [OpenAI](https://platform.openai.com)
-   - Anthropic: Get your API key from [Anthropic](https://console.anthropic.com)
-   - Google: Get your API key from [Google AI Studio](https://makersuite.google.com)
+npm or yarn​
+Reddit
++2
+Stack Overflow
++2
+GitHub
++2
 
-## Usage
+Installation
+bash
+Copy
+Edit
+# Clone the repository
+git clone https://github.com/alportblu/GenieUI.git
+cd GenieUI
 
-1. Select your desired model from the sidebar
-2. For cloud models (OpenAI, Anthropic, Google), enter your API key in the settings
-3. For Ollama models, ensure Ollama is running and the endpoint is correct
-4. Upload files using the file uploader
-5. Start chatting!
-
-## Development
-
-```bash
 # Install dependencies
 npm install
-
-# Start development server
+# or
+yarn install
+Running the Development Server
+bash
+Copy
+Edit
 npm run dev
+# or
+yarn dev
+Visit http://localhost:3000 to view the application.​
+Medium
++4
+GitHub
++4
+DEV Community
++4
 
-# Build for production
+Building for Production
+bash
+Copy
+Edit
 npm run build
+# or
+yarn build
+Running Tests
+bash
+Copy
+Edit
+npm run test
+# or
+yarn test
+🔐 Environment Variables
+Create a .env.local file in the root directory and configure the following variables:​
 
-# Start production server
-npm run start
-```
+env
+Copy
+Edit
+# OpenAI API Key
+OPENAI_API_KEY=your-openai-api-key
 
-## License
+# Anthropic API Key
+ANTHROPIC_API_KEY=your-anthropic-api-key
 
-MIT License - feel free to use this project for any purpose.
+# Groq API Key
+GROQ_API_KEY=your-groq-api-key
 
-## Contributing
+# Google API Key
+GOOGLE_API_KEY=your-google-api-key
+Refer to .env.example for a complete list of required environment variables.​
+DEV Community
++5
+Reddit
++5
+GitHub
++5
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+📄 License
+This project is licensed under the MIT License.​
+GitHub
+
