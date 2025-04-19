@@ -5,9 +5,10 @@ import { Chat } from '@/components/Chat'
 import { ModelSelector } from '@/components/ModelSelector'
 import { useModelStore } from '@/store/modelStore'
 import { useChatStore } from '@/store/chatStore'
-import { ChatList } from '@/components/ChatList'
+import { ChatList, DrawerChatList } from '@/components/ChatList'
 import { Toaster } from 'react-hot-toast'
 import { DisableNextDevTools } from '@/components/DisableNextDevTools'
+import Link from 'next/link'
 
 // Componente para remover o botão de dev tools do Next.js
 const RemoveNextDevTools = () => {
@@ -97,60 +98,74 @@ export default function Home() {
       {isClient && <DisableNextDevTools />}
       
       {/* Mobile navigation controls */}
-      <div className="md:hidden fixed top-2 left-2 z-50">
-        <button 
-          onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-          className="bg-gray-700 p-2 rounded-lg text-white"
-        >
-          {showLeftSidebar ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          )}
-        </button>
-      </div>
-      
-      <div className="md:hidden fixed top-2 right-2 z-50">
-        <button 
-          onClick={() => setShowRightSidebar(!showRightSidebar)}
-          className="bg-gray-700 p-2 rounded-lg text-white"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9-9 9-9-1.8-9-9 1.8-9 9-9z" />
-            <path d="M12 8v8M8 12h8" />
-          </svg>
-        </button>
-      </div>
+      {isClient && (
+        <>
+          <div className="md:hidden fixed top-2 left-2 z-50">
+            <button 
+              onClick={() => setShowLeftSidebar(!showLeftSidebar)}
+              className="menu-toggle bg-gray-700 p-2 rounded-lg text-white"
+            >
+              {showLeftSidebar ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              )}
+            </button>
+          </div>
+          <div className="md:hidden fixed top-2 right-2 z-50">
+            <button 
+              onClick={() => setShowRightSidebar(!showRightSidebar)}
+              className="menu-toggle bg-gray-700 p-2 rounded-lg text-white"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9-9 9-9-1.8-9-9 1.8-9 9-9z" />
+                <path d="M12 8v8M8 12h8" />
+              </svg>
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Left sidebar - collapsible */}
-      <div className={`${showLeftSidebar ? 'translate-x-0' : '-translate-x-full'} 
-        md:translate-x-0 fixed md:relative md:w-[260px] w-[85%] flex-shrink-0 bg-gray-800 
-        border-r border-gray-700 flex flex-col h-full z-40 transition-transform duration-300`}>
-        <div className="flex-1 overflow-y-auto p-2">
-          <ChatList
-            chats={chats}
-            currentChatId={currentChatId || undefined}
-            onNewChat={createChat}
-            onSelectChat={(id) => {
-              selectChat(id)
-              // Auto-hide sidebar on mobile after selecting a chat
-              if (isMobile) {
-                setShowLeftSidebar(false)
-              }
-            }}
-            onDeleteChat={deleteChat}
-          />
+      {/* Render DrawerChatList no mobile, ChatList na sidebar no desktop */}
+      {isClient && isMobile ? (
+        <DrawerChatList
+          open={showLeftSidebar}
+          onClose={() => setShowLeftSidebar(false)}
+          chats={chats}
+          currentChatId={currentChatId || undefined}
+          onNewChat={createChat}
+          onSelectChat={(id) => {
+            selectChat(id)
+            setShowLeftSidebar(false)
+          }}
+          onDeleteChat={deleteChat}
+        />
+      ) : (
+        <div className={`${showLeftSidebar ? 'translate-x-0' : '-translate-x-full'} 
+          md:translate-x-0 fixed md:relative md:w-[260px] w-[85%] flex-shrink-0 bg-gray-800 
+          border-r border-gray-700 flex flex-col h-full z-40 transition-transform duration-300`}>
+          <div className="flex-1 overflow-y-auto p-2">
+            <ChatList
+              chats={chats}
+              currentChatId={currentChatId || undefined}
+              onNewChat={createChat}
+              onSelectChat={(id) => {
+                selectChat(id)
+                // Auto-hide sidebar on mobile after selecting a chat
+                if (isMobile) {
+                  setShowLeftSidebar(false)
+                }
+              }}
+              onDeleteChat={deleteChat}
+            />
+          </div>
         </div>
-        <div className="p-4 border-t border-gray-700">
-          <button className="w-full text-left text-gray-300 hover:bg-gray-700 rounded-lg px-4 py-2 transition-colors">
-            Settings
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Main chat area - full width */}
       <div className="flex-1 flex bg-gray-900">

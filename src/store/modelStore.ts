@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { v4 as uuidv4 } from 'uuid'
+import type { Chat } from '@/store/chatStore'
 
 export interface ModelInfo {
   name: string;
@@ -17,15 +19,19 @@ export type ContextSize = number;
 
 interface ModelState {
   selectedModel: string | null
+  selectedProvider: 'ollama' | 'openai' | 'anthropic' | 'google' | 'groq' | 'grok' | null
   ollamaEndpoint: string
   setSelectedModel: (model: string) => void
+  setSelectedProvider: (provider: ModelState['selectedProvider']) => void
   setOllamaEndpoint: (endpoint: string) => void
   apiKeys: {
     openai?: string
     anthropic?: string
     google?: string
+    groq?: string
+    grok?: string // X/Twitter session token
   }
-  setApiKey: (provider: 'openai' | 'anthropic' | 'google', key: string) => void
+  setApiKey: (provider: keyof ModelState['apiKeys'], key: string) => void
   
   // Adicionar informações sobre modelos
   modelsInfo: Record<string, ModelInfo>
@@ -38,14 +44,20 @@ interface ModelState {
   
   // Obter os tamanhos de contexto disponíveis para um modelo
   getAvailableContextSizes: (modelName: string) => ContextSize[]
+
+  chats: Chat[]
+  currentChatId: string
+  createChat: () => void
 }
 
 export const useModelStore = create<ModelState>()(
   persist(
     (set, get) => ({
       selectedModel: null,
+      selectedProvider: null,
       ollamaEndpoint: 'http://localhost:11434',
       setSelectedModel: (model) => set({ selectedModel: model }),
+      setSelectedProvider: (provider) => set({ selectedProvider: provider }),
       setOllamaEndpoint: (endpoint) => set({ ollamaEndpoint: endpoint }),
       apiKeys: {},
       setApiKey: (provider, key) =>
@@ -93,6 +105,26 @@ export const useModelStore = create<ModelState>()(
         
         // Filtra apenas os tamanhos de contexto que o modelo suporta
         return CONTEXT_SIZES.filter(size => size <= maxContextLength);
+      },
+
+      chats: [],
+      currentChatId: '',
+      createChat: () => {
+        const state = get();
+        const newChat: Chat = {
+          id: uuidv4(),
+          title: 'New Chat',
+          messages: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        set({
+          chats: [newChat, ...state.chats],
+          currentChatId: newChat.id,
+          // Mantém o modelo e provedor selecionados do último chat
+          selectedModel: state.selectedModel,
+          selectedProvider: state.selectedProvider,
+        });
       },
     }),
     {

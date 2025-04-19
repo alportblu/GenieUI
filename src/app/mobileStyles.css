@@ -50,4 +50,12 @@
     z-index: 99999;
     pointer-events: none;
   }
+}
+
+button.menu-toggle {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 10000 !important;
 } 

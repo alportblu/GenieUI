@@ -16,177 +16,123 @@ import {
 import { cn } from '@/lib/utils'
 import { ModelInfo } from '@/store/modelStore'
 import { formatContextSize } from '@/lib/tokenCounter'
+import type { OllamaModel } from '@/lib/api/ollama'
 
 interface ModelSelectorProps {
   compact?: boolean
 }
 
-const cloudModels = {
-  'OpenAI Models': [
-    'gpt-3.5-turbo',
+const PROVIDERS = [
+  { id: 'ollama', label: 'Ollama (Local)' },
+  { id: 'openai', label: 'OpenAI (GPT-3.5/4)' },
+  { id: 'anthropic', label: 'Anthropic (Claude)' },
+  { id: 'google', label: 'Google (Gemini)' },
+  { id: 'groq', label: 'Groq (Llama/Mixtral/Gemma)' },
+  { id: 'grok', label: 'Grok (X/Twitter)' },
+] as const;
+
+type CloudProvider = 'openai' | 'anthropic' | 'google' | 'groq' | 'grok';
+
+const MODELS_BY_PROVIDER: Record<CloudProvider, string[]> = {
+  openai: [
+    'gpt-4o',
+    'gpt-4-turbo',
     'gpt-4',
-    'gpt-4-turbo-preview',
+    'gpt-4-32k',
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
   ],
-  'Anthropic Models': [
-    'claude-3-opus',
-    'claude-3-sonnet',
-    'claude-3-haiku',
+  anthropic: [
+    'claude-3-opus-20240229',
+    'claude-3-sonnet-20240229',
+    'claude-3-haiku-20240307',
+    'claude-2.1',
+    'claude-2.0',
+    'claude-instant-1.2',
   ],
-  'Google Models': [
+  google: [
+    'gemini-1.5-pro-latest',
+    'gemini-1.0-pro',
+    'gemini-1.0-pro-vision',
     'gemini-pro',
     'gemini-pro-vision',
   ],
-}
+  groq: [
+    'llama3-70b-8192',
+    'llama3-8b-8192',
+    'mixtral-8x7b-32768',
+    'gemma-7b-it',
+  ],
+  grok: [
+    'grok-1',
+    'grok-1.5',
+  ],
+};
 
 export function ModelSelector({ compact = false }: ModelSelectorProps) {
   const { 
     selectedModel, 
-    ollamaEndpoint, 
+    selectedProvider,
     setSelectedModel, 
+    setSelectedProvider,
+    apiKeys,
+    setApiKey,
+    ollamaEndpoint, 
     setOllamaEndpoint, 
     setModelInfo,
     selectedContextSize,
     setSelectedContextSize,
     getAvailableContextSizes
   } = useModelStore()
-  const [models, setModels] = useState<Array<{name: string}>>([])
+  const [models, setModels] = useState<{ name: string }[]>([])
   const [loading, setLoading] = useState(false)
-  const [isConnected, setIsConnected] = useState<boolean | null>(null)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [modelInfoMap, setModelInfoMap] = useState<Record<string, ModelInfo>>({})
-
-  const checkConnection = async () => {
-    setError(null)
-    try {
-      setLoading(true)
-      const modelList = await listOllamaModels()
-      const modelNames = modelList.map(model => model.name)
-      setModels(modelList)
-      setIsConnected(true)
-      
-      if (!selectedModel && modelNames.length > 0) {
-        setSelectedModel(modelNames[0])
-      }
-
-      toast.success('Connected to Ollama server')
-    } catch (error) {
-      console.error('Error fetching models:', error)
-      setIsConnected(false)
-      setModels([])
-      const errorMessage = error instanceof Error ? error.message : 'Failed to connect to Ollama server'
-      setError(errorMessage)
-      toast.error(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchModelInfo = async (modelName: string) => {
-    try {
-      const response = await fetch(`${ollamaEndpoint}/api/show`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          name: modelName
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to get model info (${response.status})`);
-      }
-      
-      const data = await response.json();
-      
-      let contextLength = 4096; // valor padrão
-      
-      const modelFamily = data.family?.toLowerCase() || '';
-      const parameters = data.parameters || 0;
-      
-      if (modelFamily.includes('llama') || modelFamily.includes('mistral')) {
-        if (parameters >= 70000000000) contextLength = 32768; // 70B+ models
-        else if (parameters >= 13000000000) contextLength = 16384; // 13B+ models
-        else if (parameters >= 7000000000) contextLength = 8192; // 7B+ models
-        else contextLength = 4096; // smaller models
-      } else if (modelFamily.includes('gemma')) {
-        if (parameters >= 7000000000) contextLength = 8192; // 7B models
-        else contextLength = 4096; // 2B models
-      } else if (modelFamily.includes('mpt')) {
-        contextLength = 8192;
-      }
-      
-      const modelInfo: ModelInfo = {
-        name: modelName,
-        parameters: data.parameters,
-        contextLength: contextLength,
-        quantization: data.quantization,
-        format: data.modelfile?.format,
-        families: data.families || [data.family],
-        description: data.modelfile?.system || ''
-      };
-      
-      setModelInfoMap(prev => ({
-        ...prev,
-        [modelName]: modelInfo
-      }));
-      
-      setModelInfo(modelName, modelInfo);
-      
-      return modelInfo;
-    } catch (error) {
-      console.error(`Error fetching info for model ${modelName}:`, error);
-      return null;
-    }
-  };
-
-  const loadModels = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(`${ollamaEndpoint}/api/tags`)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch models (${response.status})`)
-      }
-      const { models } = await response.json()
-      if (models && models.length > 0) {
-        setModels(models)
-        
-        const modelInfoPromises = models.map(model => fetchModelInfo(model.name));
-        await Promise.all(modelInfoPromises);
-        
-        if (!selectedModel) {
-          setSelectedModel(models[0].name)
-        }
-      } else {
-        setModels([])
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to connect to Ollama server'
-      setError(errorMessage)
-      toast.error(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   useEffect(() => {
-    checkConnection()
-  }, [ollamaEndpoint])
+    if (selectedProvider === 'ollama') {
+      setLoading(true);
+      setError(null);
+      fetch(`/api/ollama?endpoint=${encodeURIComponent(ollamaEndpoint + '/api/tags')}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.models && data.models.length > 0) {
+            setModels(data.models);
+            setSelectedModel(data.models[0].name);
+          } else {
+            setModels([]);
+            setError('Nenhum modelo encontrado no Ollama.');
+            toast.error('Nenhum modelo encontrado no Ollama!');
+          }
+        })
+        .catch(err => {
+          setError('Erro ao buscar modelos do Ollama: ' + err.message);
+          setModels([]);
+          toast.error('Erro ao buscar modelos do Ollama: ' + err.message);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [selectedProvider, ollamaEndpoint, setSelectedModel]);
 
   const ConnectionIcon = () => {
     if (loading) return <Server className="h-4 w-4 animate-pulse" />
-    if (isConnected === true) return <Server className="h-4 w-4 text-green-500" />
-    if (isConnected === false) return <ServerCrash className="h-4 w-4 text-red-500" />
-    return <ServerOff className="h-4 w-4 text-gray-500" />
+    if (error === null) return <Server className="h-4 w-4 text-green-500" />
+    return <ServerCrash className="h-4 w-4 text-red-500" />
+  }
+
+  let filteredModels: { name: string }[] = [];
+  if (selectedProvider === 'ollama') {
+    filteredModels = models;
+  } else if (selectedProvider && selectedProvider !== 'ollama' && apiKeys[selectedProvider as CloudProvider]) {
+    filteredModels = (MODELS_BY_PROVIDER[selectedProvider as CloudProvider] || []).map((name: string) => ({ name }));
+  } else {
+    filteredModels = [];
   }
 
   if (compact) {
     return (
       <div className="flex items-center gap-2">
         <ConnectionIcon />
-        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-[180px] justify-between">
               {selectedModel || 'Select a model'}
@@ -194,12 +140,11 @@ export function ModelSelector({ compact = false }: ModelSelectorProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[180px]">
-            {models.map((model) => (
+            {filteredModels.map((model) => (
               <DropdownMenuItem
                 key={model.name}
                 onClick={() => {
                   setSelectedModel(model.name)
-                  setDropdownOpen(false)
                 }}
               >
                 <Check
@@ -223,139 +168,125 @@ export function ModelSelector({ compact = false }: ModelSelectorProps) {
         <h2 className="text-lg font-medium text-white mb-4">Model Settings</h2>
         <div className="space-y-4">
           <div>
-            <label htmlFor="ollama-endpoint" className="block text-sm font-medium text-gray-300 mb-2">
-              Ollama Server
-            </label>
-            <div className="flex space-x-2">
-              <Input
-                id="ollama-endpoint"
-                value={ollamaEndpoint}
-                onChange={(e) => setOllamaEndpoint(e.target.value)}
-                placeholder="http://localhost:11434"
-                className={cn("bg-gray-700 text-white border-gray-600", error && "border-red-500")}
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={checkConnection}
-                className="shrink-0 border-gray-600 hover:bg-gray-700"
+            <label className="block text-sm font-medium text-gray-300 mb-1">Provider</label>
+            <select
+              className="w-full bg-gray-800 text-white rounded p-2 border border-gray-600"
+              value={selectedProvider || ''}
+              onChange={e => {
+                setSelectedProvider(e.target.value as any);
+                setSelectedModel(null);
+              }}
+            >
+              <option value="" disabled>Select provider...</option>
+              {PROVIDERS.map(p => (
+                <option key={p.id} value={p.id}>{p.label}</option>
+              ))}
+            </select>
+          </div>
+          {selectedProvider === 'ollama' && error && (
+            <div className="bg-red-900 text-red-200 rounded p-2 text-sm border border-red-700">
+              {error}
+            </div>
+          )}
+          {selectedProvider && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Model</label>
+              <select
+                className="w-full bg-gray-800 text-white rounded p-2 border border-gray-600"
+                value={selectedModel || ''}
+                onChange={e => setSelectedModel(e.target.value)}
               >
-                <ConnectionIcon />
-              </Button>
+                <option value="" disabled>Select model...</option>
+                {filteredModels.map(model => (
+                  <option key={model.name} value={model.name}>{model.name}</option>
+                ))}
+              </select>
             </div>
-            {error && (
-              <p className="mt-2 text-sm text-red-500">{error}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Available Models
-            </label>
-            <div className="space-y-2">
-              {models.length > 0 ? (
-                models.map((model) => (
-                  <div
-                    key={model.name}
-                    className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer ${
-                      selectedModel === model.name ? 'bg-blue-700 text-white' : 'hover:bg-gray-700'
-                    }`}
-                    onClick={() => setSelectedModel(model.name)}
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium">{model.name}</span>
-                      {modelInfoMap[model.name] && (
-                        <span className="text-xs text-gray-400">
-                          {modelInfoMap[model.name].parameters 
-                            ? `${(modelInfoMap[model.name].parameters / 1000000000).toFixed(1)}B params` 
-                            : ''
-                          }
-                          {modelInfoMap[model.name].contextLength 
-                            ? ` · ${modelInfoMap[model.name].contextLength.toLocaleString()} tokens context` 
-                            : ''
-                          }
-                          {modelInfoMap[model.name].quantization 
-                            ? ` · ${modelInfoMap[model.name].quantization}` 
-                            : ''
-                          }
-                        </span>
-                      )}
-                    </div>
-                    {selectedModel === model.name && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm text-gray-400">
-                  {isConnected === false
-                    ? 'Could not connect to Ollama server. Please check if Ollama is running and the endpoint is correct.'
-                    : 'No models found. Please install some models using the Ollama CLI.'}
-                </div>
-              )}
+          )}
+          {/* API key input para provedores externos */}
+          {selectedProvider && selectedProvider !== 'ollama' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">API Key</label>
+              <input
+                type="password"
+                className="w-full bg-gray-800 text-white rounded p-2 border border-gray-600"
+                value={apiKeys[selectedProvider] || ''}
+                onChange={e => setApiKey(selectedProvider as CloudProvider, e.target.value)}
+                placeholder={
+                  selectedProvider === 'openai' ? 'sk-...' :
+                  selectedProvider === 'anthropic' ? 'sk-ant-...' :
+                  selectedProvider === 'google' ? 'AIza...' :
+                  selectedProvider === 'groq' ? 'gsk_...' :
+                  selectedProvider === 'grok' ? 'X session token...' :
+                  ''
+                }
+              />
             </div>
-          </div>
-          
+          )}
+          {/* Endpoint para Ollama */}
+          {selectedProvider === 'ollama' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Ollama Endpoint</label>
+              <input
+                type="text"
+                className="w-full bg-gray-800 text-white rounded p-2 border border-gray-600"
+                value={ollamaEndpoint}
+                onChange={e => setOllamaEndpoint(e.target.value)}
+                placeholder="http://localhost:11434"
+              />
+            </div>
+          )}
           {/* Context Size Selector */}
           {selectedModel && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Context Size
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-                {getAvailableContextSizes(selectedModel).map((size) => (
-                  <button
-                    key={size}
-                    className={`
-                      py-1.5 px-2 text-sm rounded-md flex items-center justify-center transition-colors
-                      ${selectedContextSize === size 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }
-                    `}
-                    onClick={() => setSelectedContextSize(size)}
-                  >
-                    {formatContextSize(size)}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  className="bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl hover:bg-gray-600"
+                  onClick={() => setSelectedContextSize(Math.max(1024, selectedContextSize - 1024))}
+                  aria-label="Decrease context size"
+                >
+                  –
+                </button>
+                <input
+                  type="number"
+                  min="1024"
+                  step="1024"
+                  value={selectedContextSize}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value) && value >= 1024) {
+                      setSelectedContextSize(value);
+                    }
+                  }}
+                  className="w-24 text-center bg-gray-700 text-white border border-gray-600 rounded text-lg py-1"
+                  placeholder="4096"
+                  aria-label="Custom context size"
+                />
+                <button
+                  type="button"
+                  className="bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl hover:bg-gray-600"
+                  onClick={() => setSelectedContextSize(selectedContextSize + 1024)}
+                  aria-label="Increase context size"
+                >
+                  +
+                </button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedContextSize(4096)}
+                  className="whitespace-nowrap border-gray-600 hover:bg-gray-700 ml-2"
+                >
+                  Reset
+                </Button>
               </div>
-              
-              {/* Custom context size input */}
-              <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Custom Context Size
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    min="1024"
-                    step="1024"
-                    value={selectedContextSize}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      if (!isNaN(value) && value >= 1024) {
-                        setSelectedContextSize(value as ContextSize);
-                      }
-                    }}
-                    className="bg-gray-700 text-white border-gray-600"
-                    placeholder="Enter custom size (e.g. 4096)"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedContextSize(4096)}
-                    className="whitespace-nowrap border-gray-600 hover:bg-gray-700"
-                  >
-                    Reset
-                  </Button>
-                </div>
-                <p className="mt-1 text-xs text-gray-400">
-                  Enter a custom context size in tokens. The Ollama server will use the maximum 
-                  supported by your model if the value exceeds its capabilities.
-                </p>
-              </div>
+              <p className="mt-1 text-xs text-gray-400">
+                Enter a custom context size in tokens. The Ollama server will use the maximum 
+                supported by your model if the value exceeds its capabilities.
+              </p>
               <p className="mt-2 text-xs text-gray-400">
                 Larger context allows for more content to be processed at once 
                 but may affect performance and memory usage.

@@ -15,7 +15,7 @@ interface ContextMeterProps {
 }
 
 export function ContextMeter({ inputText = '', attachedFilesSize = 0 }: ContextMeterProps) {
-  const { selectedModel, getContextLength } = useModelStore();
+  const { selectedModel, selectedContextSize } = useModelStore();
   const { currentChatId, chats } = useChatStore();
   const [tokenCount, setTokenCount] = useState(0);
   const [maxContextLength, setMaxContextLength] = useState(4096);
@@ -23,9 +23,8 @@ export function ContextMeter({ inputText = '', attachedFilesSize = 0 }: ContextM
   
   useEffect(() => {
     if (selectedModel) {
-      // Obter o contexto máximo para o modelo selecionado
-      const contextLength = getContextLength(selectedModel);
-      setMaxContextLength(contextLength);
+      // Usar o valor customizado do usuário
+      setMaxContextLength(selectedContextSize);
       
       // Calcular tokens na conversa atual
       const currentChat = currentChatId ? chats.find(chat => chat.id === currentChatId) : null;
@@ -44,11 +43,11 @@ export function ContextMeter({ inputText = '', attachedFilesSize = 0 }: ContextM
         setTokenCount(totalTokens);
         
         // Calcular porcentagem de uso
-        const usage = calculateContextUsage(totalTokens, contextLength);
+        const usage = calculateContextUsage(totalTokens, maxContextLength);
         setUsagePercentage(usage);
       }
     }
-  }, [selectedModel, currentChatId, chats, inputText, attachedFilesSize, getContextLength]);
+  }, [selectedModel, currentChatId, chats, inputText, attachedFilesSize, maxContextLength]);
   
   // Determinar a cor do medidor com base no uso
   const getMeterColor = () => {
@@ -61,8 +60,7 @@ export function ContextMeter({ inputText = '', attachedFilesSize = 0 }: ContextM
   return (
     <div className="flex flex-col mt-1">
       <div className="flex justify-between items-center text-xs text-gray-400">
-        <span>{formatContextSize(tokenCount)}</span>
-        <span>{formatContextSize(maxContextLength)}</span>
+        <span>{`${formatContextSize(tokenCount)} / ${formatContextSize(maxContextLength)} usados`}</span>
       </div>
       <div className="w-full bg-gray-700 rounded-full h-1.5 mt-0.5">
         <div 

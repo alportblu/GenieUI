@@ -92,15 +92,9 @@ async function processFileOnServer(file: File): Promise<string> {
 async function extractTextFromPDF(arrayBuffer: ArrayBuffer): Promise<string> {
   try {
     console.log('Iniciando processamento de PDF...');
-    
-    // Criar um buffer a partir do arrayBuffer
     const buffer = Buffer.from(arrayBuffer);
-    
-    // Processar o PDF com pdf-parse, usando opções para desativar worker
     const options = {
-      // Versão específica do PDF.js a ser usada
       version: 'v1.10.100',
-      // Função personalizada para extrair o texto (simplificada)
       pagerender: function(pageData: any) {
         const renderOptions = {
           normalizeWhitespace: false,
@@ -110,7 +104,6 @@ async function extractTextFromPDF(arrayBuffer: ArrayBuffer): Promise<string> {
           .then(function(textContent: any) {
             let text = '';
             let lastY;
-            // Extrair o texto item por item, preservando quebras de linha
             for (let item of textContent.items) {
               if (lastY == item.transform[5] || !lastY) {
                 text += item.str;
@@ -123,20 +116,17 @@ async function extractTextFromPDF(arrayBuffer: ArrayBuffer): Promise<string> {
           });
       }
     };
-    
-    // Processar com opções personalizadas
     const data = await pdfParse(buffer, options);
-    
     if (data.text && data.text.trim()) {
-      return data.text.trim();
+      // Inclui o número de páginas no início do texto, seguido do texto completo SEM TRUNCAR
+      return `PDF: [paginas=${data.numpages}]
+` + data.text;
     } else {
       console.warn('PDF processado, mas sem texto extraído');
       return 'Não foi encontrado texto neste PDF. O PDF pode conter apenas imagens ou ser digitalizado.';
     }
   } catch (error: any) {
     console.error('Erro geral no processamento de PDF:', error);
-    
-    // Fornecer uma resposta amigável
     const errorInfo = `[PDF processado: ${Math.round(arrayBuffer.byteLength / 1024)}KB]`;
     const errorMessage = error?.message || 'Erro desconhecido';
     return `${errorInfo}\nNão foi possível extrair texto do PDF: ${errorMessage}`;
@@ -460,6 +450,8 @@ export async function processFile(file: File): Promise<string> {
     ) {
       // Individual email files
       return processFileOnServer(file);
+    } else if (file.name.match(/\.(html|css|js|jsx|ts|tsx|java|json|txt|md|c|cpp|h|hpp|py|rb|go|rs|php|sh|xml)$/i)) {
+      return await file.text();
     } else {
       // Try to process as text for unknown types
       try {

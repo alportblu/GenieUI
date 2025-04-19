@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import HideNextDevTools from '@/components/HideNextDevTools'
 import Script from 'next/script'
+import React from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,6 +36,49 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Botão para mostrar/ocultar painel de erros do Next.js
+  React.useEffect?.(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+    // Esconde o painel por padrão
+    const hidePanel = () => {
+      const panel = document.querySelector('div[data-nextjs-toast]');
+      if (panel && panel instanceof HTMLElement) panel.style.display = 'none';
+    };
+    hidePanel();
+    // Cria botão flutuante
+    let btn = document.getElementById('show-nextjs-errors-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'show-nextjs-errors-btn';
+      btn.innerText = '🐞';
+      btn.style.position = 'fixed';
+      btn.style.bottom = '24px';
+      btn.style.right = '24px';
+      btn.style.zIndex = '100000';
+      btn.style.background = '#222';
+      btn.style.color = '#fff';
+      btn.style.border = 'none';
+      btn.style.borderRadius = '50%';
+      btn.style.width = '44px';
+      btn.style.height = '44px';
+      btn.style.fontSize = '2rem';
+      btn.style.boxShadow = '0 2px 8px #0006';
+      btn.style.cursor = 'pointer';
+      btn.title = 'Show/hide Next.js error panel';
+      btn.onclick = () => {
+        const panel = document.querySelector('div[data-nextjs-toast]');
+        if (panel && panel instanceof HTMLElement) {
+          panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+        }
+      };
+      document.body.appendChild(btn);
+    }
+    // Esconde o painel ao carregar
+    setTimeout(hidePanel, 1000);
+    return () => {
+      btn?.remove();
+    };
+  }, []);
   return (
     <html lang="en" data-theme="dark">
       <head>

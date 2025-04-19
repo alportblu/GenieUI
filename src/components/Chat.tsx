@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, Suspense, lazy } from 'react'
 import { useChatStore } from '@/store/chatStore'
 import { useModelStore } from '@/store/modelStore'
 import { cn } from '@/lib/utils'
@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast'
 import { EmailViewer } from './EmailViewer'
 import { Folder } from 'lucide-react'
 import { ContextMeter } from './ContextMeter'
+import { saveAs } from 'file-saver'
 
 interface ChatProps {
   selectedModel: string | null
@@ -150,7 +151,7 @@ const CodeBlock = ({ content, language }: { content: string, language?: string }
   )
 }
 
-const MessageContent = ({ content }: { content: string }) => {
+const MessageContent = React.memo(({ content }: { content: string }) => {
   // Função para determinar o ícone baseado na extensão do arquivo
   const getFileIcon = (fileName: string) => {
     const ext = fileName.split('.').pop()?.toLowerCase()
@@ -364,11 +365,11 @@ const MessageContent = ({ content }: { content: string }) => {
     return cleanedLines;
   }
 
-  const cleanedContent = cleanContent(content)
-  const textContent = cleanedContent.find(item => typeof item === 'string') as string || ''
-  const attachments = cleanedContent.find(item => typeof item === 'object') as React.ReactElement | undefined
-
-  const parts = textContent.split(/(```[\s\S]*?```)/g)
+  // Memoize o processamento do conteúdo
+  const cleanedContent = React.useMemo(() => cleanContent(content), [content]);
+  const textContent = cleanedContent.find(item => typeof item === 'string') as string || '';
+  const attachments = cleanedContent.find(item => typeof item === 'object') as React.ReactElement | undefined;
+  const parts = textContent.split(/(```[\s\S]*?```)/g);
 
   return (
     <div className="space-y-4">
@@ -395,7 +396,7 @@ const MessageContent = ({ content }: { content: string }) => {
       {attachments}
     </div>
   )
-}
+})
 
 // Primeiro, adicionamos uma função para agrupar arquivos por pasta
 const groupFilesByFolder = (files: {name: string, path: string}[]) => {
@@ -448,11 +449,13 @@ const estimateFileTokens = (file: File): number => {
   }
 };
 
+const LazyEmailViewer = lazy(() => import('./EmailViewer').then(mod => ({ default: mod.EmailViewer })));
+
 export function Chat({ selectedModel }: ChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLInputElement>(null)
-  const { currentChatId, chats, addMessage } = useChatStore()
+  const { currentChatId, chats, addMessage, updateChatTitle } = useChatStore()
   const currentChat = currentChatId ? chats.find(chat => chat.id === currentChatId) : null
   const [input, setInput] = React.useState('')
   const [isGenerating, setIsGenerating] = React.useState(false)
@@ -498,28 +501,26 @@ export function Chat({ selectedModel }: ChatProps) {
   }, [isGenerating])
 
   const handleFileUpload = async (files: File[], filesList?: {name: string, path: string}[]) => {
-    // Armazenar os arquivos
-    setAttachedFiles(files);
-    
-    // Armazenar os metadados dos arquivos se fornecidos
-    if (filesList) {
-      setAttachedFilesMetadata(filesList);
-    } else {
-      // Criar lista básica se não fornecida
-      const basicList = files.map(file => ({
-        name: file.name,
-        path: (file as any).webkitRelativePath || file.name
-      }));
-      setAttachedFilesMetadata(basicList);
+    try {
+      setAttachedFiles(files);
+      if (filesList) {
+        setAttachedFilesMetadata(filesList);
+      } else {
+        const basicList = files.map(file => ({
+          name: file.name,
+          path: (file as any).webkitRelativePath || file.name
+        }));
+        setAttachedFilesMetadata(basicList);
+      }
+      setShowUploader(false);
+      setShowUploadMenu(false);
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+      toast.success(`${files.length} file(s) attached successfully!`);
+    } catch (error) {
+      toast.error('Failed to attach files. Please try again.');
     }
-    
-    setShowUploader(false);
-    setShowUploadMenu(false);
-    
-    // Focar no input após upload
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 100);
   };
 
   const handleStopGeneration = () => {
@@ -540,8 +541,12 @@ export function Chat({ selectedModel }: ChatProps) {
       return;
     }
     
-    // No modo normal, precisamos de texto OU arquivos, e um modelo selecionado
-    if (!currentChatId || (!input.trim() && attachedFiles.length === 0) || !selectedModel) return;
+    // No modo normal, precisamos de texto OU arquivos
+    if (!currentChatId || (!input.trim() && attachedFiles.length === 0)) return;
+    if (!selectedModel) {
+      toast.error('Selecione um modelo antes de enviar a mensagem!');
+      return;
+    }
 
     // Adicionar mensagem do usuário ao chat
     const userMessageContent = input.trim();
@@ -642,33 +647,96 @@ export function Chat({ selectedModel }: ChatProps) {
     setIsGenerating(true);
     
     try {
-      // Criar novo AbortController para esta requisição
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
-      
-      const response = await fetch(`/api/ollama?endpoint=${encodeURIComponent(`${ollamaEndpoint}/api/generate`)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const currentChat = useChatStore.getState().chats.find(c => c.id === currentChatId);
+      const chatHistoryText = currentChat ? currentChat.messages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') : '';
+      const systemPrompt = 'This is the full chat history so far. Answer considering all the context below.';
+      const finalPrompt = `${systemPrompt}\n\n${chatHistoryText}\nUser: ${messageContent}`;
+
+      // Provider logic
+      const { selectedProvider, apiKeys } = useModelStore.getState();
+      let endpoint = '';
+      let body: any = {};
+      let headers: any = { 'Content-Type': 'application/json' };
+      let stream = true;
+
+      if (selectedProvider === 'openai') {
+        endpoint = '/api/openai';
+        // Build OpenAI messages array
+        const messages = [];
+        if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
+        if (currentChat) {
+          for (const m of currentChat.messages) {
+            messages.push({ role: m.role, content: m.content });
+          }
+        }
+        messages.push({ role: 'user', content: messageContent });
+        body = {
           model: selectedModel,
-          prompt: messageContent,
+          apiKey: apiKeys.openai,
+          messages,
+          stream: true,
+          max_tokens: useModelStore.getState().selectedContextSize,
+        };
+      } else if (selectedProvider === 'anthropic') {
+        endpoint = '/api/anthropic';
+        body = {
+          model: selectedModel,
+          apiKey: apiKeys.anthropic,
+          prompt: finalPrompt,
+        };
+        stream = false;
+      } else if (selectedProvider === 'google') {
+        endpoint = '/api/google';
+        body = {
+          model: selectedModel,
+          apiKey: apiKeys.google,
+          prompt: finalPrompt,
+        };
+        stream = false;
+      } else if (selectedProvider === 'groq') {
+        endpoint = '/api/groq';
+        body = {
+          model: selectedModel,
+          apiKey: apiKeys.groq,
+          prompt: finalPrompt,
+        };
+        stream = false;
+      } else {
+        // Default: Ollama
+        endpoint = `/api/ollama?endpoint=${encodeURIComponent(`${ollamaEndpoint}/api/generate`)}`;
+        body = {
+          model: selectedModel,
+          prompt: finalPrompt,
           stream: true,
           context_length: useModelStore.getState().selectedContextSize,
-        }),
-        signal, // Passar o signal para abortar se necessário
+        };
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+        signal,
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        if (errorText.includes('context') || errorText.toLowerCase().includes('token')) {
+          toast.error('Context size exceeded! Try reducing the context size or message length.');
+        } else {
+          toast.error('Failed to generate response.');
+        }
         throw new Error('Failed to generate response');
       }
 
+      // Processar resposta do modelo (streaming)
       const reader = response.body?.getReader();
       let partialResponse = '';
 
       if (reader) {
-        // Add initial assistant message
+        // Adicionar mensagem inicial do assistente
         addMessage(currentChatId, {
           role: 'assistant',
           content: '',
@@ -679,66 +747,73 @@ export function Chat({ selectedModel }: ChatProps) {
           if (done) break;
 
           const chunk = new TextDecoder().decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.trim() === '') continue;
+          for (const line of chunk.split('\n')) {
+            if (!line.trim()) continue;
             try {
-              // Tratar cada linha com mais robustez
-              let jsonData;
-              try {
-                jsonData = JSON.parse(line);
-              } catch (parseError) {
-                console.warn('Invalid JSON:', line);
-                // Tentar recuperar a linha
-                try {
-                  // Tentar limpar e consertar o JSON
-                  const cleanedLine = line.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-                  if (cleanedLine.trim()) {
-                    jsonData = JSON.parse(cleanedLine);
+              if (selectedProvider === 'ollama') {
+                // Ollama: cada linha é um JSON com campo 'response'
+                const json = JSON.parse(line);
+                if (json.response) {
+                  partialResponse += json.response;
+                  // Atualizar a última mensagem do assistente
+                  const messages = useChatStore.getState().chats.find(c => c.id === currentChatId)?.messages || [];
+                  const lastMessage = messages[messages.length - 1];
+                  if (lastMessage && lastMessage.role === 'assistant') {
+                    useChatStore.setState(state => ({
+                      chats: state.chats.map(chat =>
+                        chat.id === currentChatId
+                          ? {
+                              ...chat,
+                              messages: chat.messages.map((msg, idx) =>
+                                idx === chat.messages.length - 1
+                                  ? { ...msg, content: partialResponse }
+                                  : msg
+                              )
+                            }
+                          : chat
+                      )
+                    }));
                   }
-                } catch (e) {
-                  // Se falhar, ignorar esta linha
-                  console.error('Failed to fix JSON line:', line);
-                  continue;
                 }
-              }
-              
-              // Se temos dados JSON válidos
-              if (jsonData && jsonData.response) {
-                partialResponse += jsonData.response;
-                
-                // Update the last assistant message
-                const messages = useChatStore.getState().chats.find(c => c.id === currentChatId)?.messages || [];
-                const lastMessage = messages[messages.length - 1];
-                
-                if (lastMessage && lastMessage.role === 'assistant') {
-                  // Update message with new content
-                  useChatStore.setState(state => ({
-                    chats: state.chats.map(chat => 
-                      chat.id === currentChatId 
-                        ? { 
-                            ...chat, 
-                            messages: chat.messages.map((msg, idx) => 
-                              idx === chat.messages.length - 1 
-                                ? { ...msg, content: partialResponse }
-                                : msg
-                            )
-                          }
-                        : chat
-                    )
-                  }));
+              } else if (selectedProvider === 'openai') {
+                // OpenAI: cada linha começa com 'data:' e tem campo 'choices[0].delta.content'
+                if (!line.startsWith('data:')) continue;
+                const jsonStr = line.replace('data:', '').trim();
+                if (jsonStr === '[DONE]') continue;
+                const json = JSON.parse(jsonStr);
+                const delta = json.choices?.[0]?.delta?.content;
+                if (typeof delta === 'string') {
+                  partialResponse += delta;
+                  // Atualizar a última mensagem do assistente
+                  const messages = useChatStore.getState().chats.find(c => c.id === currentChatId)?.messages || [];
+                  const lastMessage = messages[messages.length - 1];
+                  if (lastMessage && lastMessage.role === 'assistant') {
+                    useChatStore.setState(state => ({
+                      chats: state.chats.map(chat =>
+                        chat.id === currentChatId
+                          ? {
+                              ...chat,
+                              messages: chat.messages.map((msg, idx) =>
+                                idx === chat.messages.length - 1
+                                  ? { ...msg, content: partialResponse }
+                                  : msg
+                              )
+                            }
+                          : chat
+                      )
+                    }));
+                  }
                 }
               }
             } catch (e) {
-              console.error('Error processing response chunk:', e);
-              // Continue tentando processar outras linhas
+              // Ignorar erros de parse
+              continue;
             }
           }
         }
       }
     } catch (error: any) {
-      console.error('Error:', error);
+      toast.error(error.message || 'An unexpected error occurred.');
       // Se for erro de abort, dar mensagem diferente
       if (error.name === 'AbortError') {
         const messages = useChatStore.getState().chats.find(c => c.id === currentChatId)?.messages || [];
@@ -891,7 +966,13 @@ Based on these search results, please provide a comprehensive answer to my query
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to analyze search results: ${response.status}`);
+        const errorText = await response.text();
+        if (errorText.includes('context') || errorText.toLowerCase().includes('token')) {
+          toast.error('Context size exceeded! Try reducing the context size or message length.');
+        } else {
+          toast.error('Failed to generate response.');
+        }
+        throw new Error('Failed to generate response');
       }
 
       // Remover a mensagem de processamento
@@ -927,54 +1008,41 @@ Based on these search results, please provide a comprehensive answer to my query
           for (const line of lines) {
             if (line.trim() === '') continue;
             try {
-              // Tratar cada linha com mais robustez
               let jsonData;
               try {
                 jsonData = JSON.parse(line);
               } catch (parseError) {
-                console.warn('Invalid JSON:', line);
-                // Tentar recuperar a linha
-                try {
-                  // Tentar limpar e consertar o JSON
-                  const cleanedLine = line.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-                  if (cleanedLine.trim()) {
-                    jsonData = JSON.parse(cleanedLine);
-                  }
-                } catch (e) {
-                  // Se falhar, ignorar esta linha
-                  console.error('Failed to fix JSON line:', line);
-                  continue;
-                }
+                // Ignorar linhas que não são JSON
+                continue;
               }
+              // Só processar se tiver campo 'response' (ignorar tokens/context/etc)
+              if (!jsonData || typeof jsonData.response !== 'string') continue;
+              partialResponse += jsonData.response;
               
-              // Se temos dados JSON válidos
-              if (jsonData && jsonData.response) {
-                partialResponse += jsonData.response;
-                
-                // Update the last assistant message
-                const messages = useChatStore.getState().chats.find(c => c.id === currentChatId)?.messages || [];
-                const lastMessage = messages[messages.length - 1];
-                
-                if (lastMessage && lastMessage.role === 'assistant') {
-                  // Update message with new content
-                  useChatStore.setState(state => ({
-                    chats: state.chats.map(chat => 
-                      chat.id === currentChatId 
-                        ? { 
-                            ...chat, 
-                            messages: chat.messages.map((msg, idx) => 
-                              idx === chat.messages.length - 1 
-                                ? { ...msg, content: partialResponse }
-                                : msg
-                            )
-                          }
-                        : chat
-                    )
-                  }));
-                }
+              // Update the last assistant message
+              const messages = useChatStore.getState().chats.find(c => c.id === currentChatId)?.messages || [];
+              const lastMessage = messages[messages.length - 1];
+              
+              if (lastMessage && lastMessage.role === 'assistant') {
+                // Update message with new content
+                useChatStore.setState(state => ({
+                  chats: state.chats.map(chat => 
+                    chat.id === currentChatId 
+                      ? { 
+                          ...chat, 
+                          messages: chat.messages.map((msg, idx) => 
+                            idx === chat.messages.length - 1 
+                              ? { ...msg, content: partialResponse }
+                              : msg
+                          )
+                        }
+                      : chat
+                  )
+                }));
               }
             } catch (e) {
-              console.error('Error processing response chunk:', e);
+              // Ignorar erros de parse
+              continue;
             }
           }
         }
@@ -984,7 +1052,7 @@ Based on these search results, please provide a comprehensive answer to my query
       setInput('');
       setSearchModeActive(false);
     } catch (error: any) {
-      console.error('Error searching or analyzing results:', error);
+      toast.error(error.message || 'An unexpected error occurred.');
       // Mensagem de erro amigável para o usuário
       addMessage(currentChatId, {
         role: 'assistant',
@@ -1053,8 +1121,46 @@ Based on these search results, please provide a comprehensive answer to my query
     setShowUploader(true);
   };
 
+  // Função para exportar conversa
+  const handleExportChat = (format: 'txt' | 'md' = 'md') => {
+    if (!currentChat) return;
+    let content = '';
+    if (format === 'md') {
+      content = currentChat.messages.map(msg =>
+        `**${msg.role === 'user' ? 'User' : 'Assistant'}:**\n\n${msg.content}\n`
+      ).join('\n---\n\n');
+    } else {
+      content = currentChat.messages.map(msg =>
+        `${msg.role === 'user' ? 'User' : 'Assistant'}:\n${msg.content}\n\n`
+      ).join('-------------------\n');
+    }
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    saveAs(blob, `${currentChat.title || 'chat'}.${format}`);
+  };
+
   return (
     <div className="absolute inset-0 flex flex-col bg-gray-900">
+      {/* Botão de exportar conversa */}
+      {currentChat && currentChat.messages.length > 0 && (
+        <div className="absolute right-4 top-4 z-20 flex gap-2">
+          <button
+            className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded shadow text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+            onClick={() => handleExportChat('md')}
+            title="Export as Markdown"
+            aria-label="Export chat as Markdown"
+          >
+            Export MD
+          </button>
+          <button
+            className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded shadow text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+            onClick={() => handleExportChat('txt')}
+            title="Export as TXT"
+            aria-label="Export chat as TXT"
+          >
+            Export TXT
+          </button>
+        </div>
+      )}
       <div 
         ref={chatContainerRef}
         onScroll={handleScroll}
@@ -1302,10 +1408,11 @@ Based on these search results, please provide a comprehensive answer to my query
                   type="button"
                     onClick={() => setShowUploadMenu(!showUploadMenu)}
                     className={cn(
-                      "text-gray-400 hover:text-white p-1 transition-colors",
+                      "text-gray-400 hover:text-white p-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
                       searchModeActive && "opacity-50"
                     )}
                     title="Upload options"
+                    aria-label="Upload options"
                     disabled={isGenerating || isProcessingFile || isSearching || searchModeActive}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1358,13 +1465,14 @@ Based on these search results, please provide a comprehensive answer to my query
                   type="button"
                   onClick={toggleSearchMode}
                   className={cn(
-                    "transition-colors flex items-center justify-center relative group p-1 rounded",
+                    "transition-colors flex items-center justify-center relative group p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
                     searchModeActive 
                       ? "bg-blue-500 text-white" 
                       : "text-gray-400 hover:text-blue-400",
                     (isGenerating || isProcessingFile || isSearching) && "opacity-50 cursor-not-allowed"
                   )}
                   title={searchModeActive ? "Exit search mode" : "Search the web"}
+                  aria-label={searchModeActive ? "Exit search mode" : "Search the web"}
                   disabled={isGenerating || isProcessingFile || isSearching}
                 >
                   <svg 
@@ -1398,8 +1506,9 @@ Based on these search results, please provide a comprehensive answer to my query
                 <button
                   onClick={handleStopGeneration}
                   type="button"
-                  className="absolute right-2 p-1.5 sm:p-2 rounded-lg text-white hover:bg-gray-600 focus:outline-none"
+                  className="absolute right-2 p-1.5 sm:p-2 rounded-lg text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                   title="Stop generation"
+                  aria-label="Stop generation"
                 >
                   <div className="relative">
                     {/* Ícone de parada (quadrado) */}
@@ -1419,12 +1528,14 @@ Based on these search results, please provide a comprehensive answer to my query
                 }}
                 type="submit"
                 className={cn(
-                    'absolute right-2 p-1.5 sm:p-2 rounded-lg text-white',
+                    'absolute right-2 p-1.5 sm:p-2 rounded-lg text-white hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
                   'hover:bg-gray-600 focus:outline-none',
                     ((!input.trim() || (isGenerating && !searchModeActive) || (!selectedModel && !searchModeActive) || isProcessingFile || isSearching)) && 'opacity-50 cursor-not-allowed',
                     searchModeActive && input.trim() && 'bg-blue-500'
                   )}
                   disabled={!input.trim() || (isGenerating && !searchModeActive) || (!selectedModel && !searchModeActive) || isProcessingFile || isSearching}
+                  title={searchModeActive ? "Send search query" : "Send message"}
+                  aria-label={searchModeActive ? "Send search query" : "Send message"}
                 >
                   {searchModeActive ? (
                     <svg width="16" height="16" className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1443,23 +1554,25 @@ Based on these search results, please provide a comprehensive answer to my query
                 ? 'Generating...' 
                 : isProcessingFile 
                   ? 'Processing files...' 
-                  : isSearching 
-                    ? 'Searching the web for information...' 
-                    : searchModeActive
-                      ? 'Enter your search query and press Enter'
-                      : 'AI may produce inaccurate information'}
+                : isSearching 
+                  ? 'Searching the web for information...' 
+                : searchModeActive
+                  ? 'Enter your search query and press Enter'
+                  : 'AI may produce inaccurate information'}
             </div>
           </form>
         </div>
       </div>
       {showEmailViewer && emailViewerFile && (
-        <EmailViewer 
-          file={emailViewerFile}
-          onClose={() => {
-            setShowEmailViewer(false);
-            setEmailViewerFile(null);
-          }}
-        />
+        <Suspense fallback={<div className="fixed inset-0 bg-gray-900/80 flex items-center justify-center z-50 text-white text-lg">Loading email viewer...</div>}>
+          <LazyEmailViewer
+            file={emailViewerFile}
+            onClose={() => {
+              setShowEmailViewer(false);
+              setEmailViewerFile(null);
+            }}
+          />
+        </Suspense>
       )}
       <ContextMeter 
         inputText={input} 

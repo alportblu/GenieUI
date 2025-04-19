@@ -23,6 +23,13 @@ export function FileUploader({ onFilesSelected, uploadType = 'files' }: FileUplo
   const [fileCount, setFileCount] = useState(0);
   const [folderName, setFolderName] = useState('');
   const [showFullList, setShowFullList] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const MAX_FILE_SIZE_MB = 20;
+  const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
+  const ALLOWED_EXTENSIONS = [
+    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'png', 'jpg', 'jpeg', 'gif', 'txt', 'md', 'csv', 'eml', 'msg', 'pst', 'ost', 'ppt', 'pptx'
+  ];
 
   const processFiles = async (acceptedFiles: File[]) => {
     setIsProcessing(true);
@@ -94,7 +101,7 @@ export function FileUploader({ onFilesSelected, uploadType = 'files' }: FileUplo
     }
     
     if (filesToProcess.length > 0) {
-      toast.success(`${filesToProcess.length} files ready to be processed`);
+      // toast.success removido para evitar duplicidade; feedback de sucesso é dado no Chat.tsx
       onFilesSelected(filesToProcess, filesList);
     } else {
       toast.error('No valid files found');
@@ -103,9 +110,37 @@ export function FileUploader({ onFilesSelected, uploadType = 'files' }: FileUplo
     setIsProcessing(false);
   };
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    processFiles(acceptedFiles);
-  }, [onFilesSelected, uploadType]);
+  // Novo: preview dos arquivos
+  const handleDrop = useCallback((acceptedFiles: File[]) => {
+    const validFiles: File[] = [];
+    for (const file of acceptedFiles) {
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        toast.error(`File type not supported: ${file.name}`);
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`File too large: ${file.name} (max ${MAX_FILE_SIZE_MB}MB)`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles]);
+      // Upload automático ao selecionar
+      processFiles([...selectedFiles, ...validFiles]);
+      setSelectedFiles([]);
+    }
+  }, [selectedFiles]);
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles(files => files.filter((_, i) => i !== index));
+  };
+
+  const handleAttach = () => {
+    processFiles(selectedFiles);
+    setSelectedFiles([]);
+  };
 
   // Determine accept types based on upload type
   const getAcceptTypes = (): Accept => {
@@ -134,22 +169,51 @@ export function FileUploader({ onFilesSelected, uploadType = 'files' }: FileUplo
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
+    onDrop: handleDrop,
     accept: getAcceptTypes(),
     noClick: false,
     noKeyboard: false,
     noDrag: false,
     multiple: true,
-    // Set directory attribute only for folder upload
-    // @ts-ignore - directory is not in type definition but is supported by the library
-    directory: uploadType === 'folder',
   });
 
   // Custom input props for folder upload
   const customInputProps = {
     ...getInputProps(),
-    ...(uploadType === 'folder' ? { directory: "true", webkitdirectory: "true" } : {}),
+    ...(uploadType === 'folder' ? { directory: '', webkitdirectory: '' } : {}),
   };
+
+  // Preview dos arquivos selecionados
+  const renderPreview = () => (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {selectedFiles.map((file, idx) => {
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        const isImage = file.type.startsWith('image/');
+        return (
+          <div key={idx} className="flex items-center gap-2 bg-gray-800 rounded px-2 py-1">
+            {isImage ? (
+              <img
+                src={URL.createObjectURL(file)}
+                alt={file.name}
+                className="w-10 h-10 object-cover rounded"
+                onLoad={e => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
+              />
+            ) : (
+              <span className="w-10 h-10 flex items-center justify-center bg-gray-700 rounded">
+                {ext === 'pdf' ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M4 13h16"/></svg>
+                ) : (
+                  <Upload className="w-6 h-6 text-gray-400" />
+                )}
+              </span>
+            )}
+            <span className="truncate max-w-[120px] text-xs text-gray-200">{file.name}</span>
+            <button onClick={() => handleRemoveFile(idx)} className="text-gray-400 hover:text-red-400 ml-1">×</button>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   // Renderizar uma visualização compacta se estamos carregando uma pasta e já temos arquivos
   if (uploadType === 'folder' && fileCount > 0) {
@@ -223,6 +287,8 @@ export function FileUploader({ onFilesSelected, uploadType = 'files' }: FileUplo
           </div>
         )}
       </div>
+      {/* Preview dos arquivos antes do envio */}
+      {selectedFiles.length > 0 && renderPreview()}
     </div>
   )
 } 
