@@ -54,3 +54,4 @@ node_modules
 .next/
 .env*
 .env*
+.next/
