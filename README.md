@@ -73,33 +73,15 @@ npm run build
 yarn build
 ```
 
-### Running Tests
+### Images
 
-```bash
-npm run test
-# or
-yarn test
-```
+# Ollama
+<img width="1546" alt="Screenshot 2025-04-19 at 8 11 56 PM" src="https://github.com/user-attachments/assets/bf04c8fc-1171-4532-8d99-9b0529ca4696" />
 
-## 🔐 Environment Variables
+# OpenAI
+<img width="1548" alt="Screenshot 2025-04-19 at 8 18 55 PM" src="https://github.com/user-attachments/assets/0257f030-6f8f-4097-aac9-2589b0a189ce" />
 
-Create a `.env.local` file in the root directory and configure the following variables:
 
-```env
-# OpenAI API Key
-OPENAI_API_KEY=your-openai-api-key
-
-# Anthropic API Key
-ANTHROPIC_API_KEY=your-anthropic-api-key
-
-# Groq API Key
-GROQ_API_KEY=your-groq-api-key
-
-# Google API Key
-GOOGLE_API_KEY=your-google-api-key
-```
-
-Refer to `.env.example` for a complete list of required environment variables.
 
 ## 📄 License
 
