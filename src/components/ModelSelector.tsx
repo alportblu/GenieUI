@@ -22,6 +22,9 @@ interface ModelSelectorProps {
   compact?: boolean
 }
 
+type CloudProvider = 'openai' | 'anthropic' | 'google' | 'groq' | 'grok';
+type Provider = CloudProvider | 'ollama';
+
 const PROVIDERS = [
   { id: 'ollama', label: 'Ollama (Local)' },
   { id: 'openai', label: 'OpenAI (GPT-3.5/4)' },
@@ -30,8 +33,6 @@ const PROVIDERS = [
   { id: 'groq', label: 'Groq (Llama/Mixtral/Gemma)' },
   { id: 'grok', label: 'Grok (X/Twitter)' },
 ] as const;
-
-type CloudProvider = 'openai' | 'anthropic' | 'google' | 'groq' | 'grok';
 
 const MODELS_BY_PROVIDER: Record<CloudProvider, string[]> = {
   openai: [
@@ -120,10 +121,12 @@ export function ModelSelector({ compact = false }: ModelSelectorProps) {
   }
 
   let filteredModels: { name: string }[] = [];
-  if (selectedProvider === 'ollama') {
+  const provider = selectedProvider;
+
+  if (provider === 'ollama') {
     filteredModels = models;
-  } else if (selectedProvider && selectedProvider !== 'ollama' && apiKeys[selectedProvider as CloudProvider]) {
-    filteredModels = (MODELS_BY_PROVIDER[selectedProvider as CloudProvider] || []).map((name: string) => ({ name }));
+  } else if (provider && apiKeys[provider as CloudProvider]) {
+    filteredModels = (MODELS_BY_PROVIDER[provider as CloudProvider] || []).map((name: string) => ({ name }));
   } else {
     filteredModels = [];
   }
@@ -173,8 +176,8 @@ export function ModelSelector({ compact = false }: ModelSelectorProps) {
               className="w-full bg-gray-800 text-white rounded p-2 border border-gray-600"
               value={selectedProvider || ''}
               onChange={e => {
-                setSelectedProvider(e.target.value as any);
-                setSelectedModel(null);
+                setSelectedProvider(e.target.value as Provider);
+                setSelectedModel('');
               }}
             >
               <option value="" disabled>Select provider...</option>

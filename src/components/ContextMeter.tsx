@@ -60,7 +60,7 @@ export function ContextMeter({ inputText = '', attachedFilesSize = 0 }: ContextM
   return (
     <div className="flex flex-col mt-1">
       <div className="flex justify-between items-center text-xs text-gray-400">
-        <span>{`${formatContextSize(tokenCount)} / ${formatContextSize(maxContextLength)} usados`}</span>
+        <span>{`${formatContextSize(tokenCount)} / ${formatContextSize(maxContextLength)} used`}</span>
       </div>
       <div className="w-full bg-gray-700 rounded-full h-1.5 mt-0.5">
         <div 

@@ -92,41 +92,23 @@ async function processFileOnServer(file: File): Promise<string> {
 async function extractTextFromPDF(arrayBuffer: ArrayBuffer): Promise<string> {
   try {
     console.log('Iniciando processamento de PDF...');
+    
+    // Criar um buffer a partir do arrayBuffer
     const buffer = Buffer.from(arrayBuffer);
-    const options = {
-      version: 'v1.10.100',
-      pagerender: function(pageData: any) {
-        const renderOptions = {
-          normalizeWhitespace: false,
-          disableCombineTextItems: false
-        };
-        return pageData.getTextContent(renderOptions)
-          .then(function(textContent: any) {
-            let text = '';
-            let lastY;
-            for (let item of textContent.items) {
-              if (lastY == item.transform[5] || !lastY) {
-                text += item.str;
-              } else {
-                text += '\n' + item.str;
-              }
-              lastY = item.transform[5];
-            }
-            return text;
-          });
-      }
-    };
-    const data = await pdfParse(buffer, options);
+    
+    // Processar o PDF com pdf-parse diretamente - sem configurações complexas de pagerender
+    const data = await pdfParse(buffer);
+    
     if (data.text && data.text.trim()) {
-      // Inclui o número de páginas no início do texto, seguido do texto completo SEM TRUNCAR
-      return `PDF: [paginas=${data.numpages}]
-` + data.text;
+      return data.text.trim();
     } else {
       console.warn('PDF processado, mas sem texto extraído');
       return 'Não foi encontrado texto neste PDF. O PDF pode conter apenas imagens ou ser digitalizado.';
     }
   } catch (error: any) {
     console.error('Erro geral no processamento de PDF:', error);
+    
+    // Fornecer uma resposta amigável
     const errorInfo = `[PDF processado: ${Math.round(arrayBuffer.byteLength / 1024)}KB]`;
     const errorMessage = error?.message || 'Erro desconhecido';
     return `${errorInfo}\nNão foi possível extrair texto do PDF: ${errorMessage}`;
@@ -134,11 +116,13 @@ async function extractTextFromPDF(arrayBuffer: ArrayBuffer): Promise<string> {
 }
 
 async function extractTextFromWord(arrayBuffer: ArrayBuffer): Promise<string> {
+  console.log('Attempting to process Word document...'); // Log start
   try {
     const result = await mammoth.extractRawText({ arrayBuffer });
+    console.log('Mammoth processing complete. Result:', result); // Log result
     return result.value || 'No text content found in Word document';
   } catch (error) {
-    console.error('Error processing Word document:', error);
+    console.error('Error processing Word document with Mammoth:', error); // Log error
     return 'Error: Could not process Word document';
   }
 }
@@ -383,85 +367,13 @@ export async function extractEmailContent(file: File): Promise<string> {
 }
 
 export async function processFile(file: File): Promise<string> {
+  console.log(`Delegating processing to server for: ${file.name}, Type: ${file.type}`);
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const fileType = file.type.toLowerCase();
-    const fileName = file.name.toLowerCase();
-
-    // Check file type and use appropriate extraction method
-    if (fileType.includes('pdf') || fileName.endsWith('.pdf')) {
-      return extractTextFromPDF(arrayBuffer);
-    } else if (
-      fileType.includes('word') || 
-      fileType.includes('docx') || 
-      fileType.includes('doc') || 
-      fileName.endsWith('.docx') || 
-      fileName.endsWith('.doc')
-    ) {
-      return extractTextFromWord(arrayBuffer);
-    } else if (
-      fileType.includes('excel') || 
-      fileType.includes('xlsx') || 
-      fileType.includes('xls') || 
-      fileName.endsWith('.xlsx') || 
-      fileName.endsWith('.xls') ||
-      fileName.endsWith('.csv')
-    ) {
-      return extractTextFromExcel(arrayBuffer);
-    } else if (
-      fileType.includes('zip') || 
-      fileName.endsWith('.zip')
-    ) {
-      return extractTextFromZip(arrayBuffer);
-    } else if (
-      fileType.includes('image') || 
-      fileName.endsWith('.png') || 
-      fileName.endsWith('.jpg') || 
-      fileName.endsWith('.jpeg') || 
-      fileName.endsWith('.gif')
-    ) {
-      return extractTextFromImage(arrayBuffer);
-    } else if (
-      fileType.includes('text') || 
-      fileName.endsWith('.txt') ||
-      fileName.endsWith('.csv')
-    ) {
-      return extractTextFromText(arrayBuffer);
-    } else if (fileName.endsWith('.md')) {
-      const text = await extractTextFromText(arrayBuffer);
-      return extractTextFromMarkdown(text);
-    } else if (
-      fileType.includes('ppt') || 
-      fileName.endsWith('.ppt') || 
-      fileName.endsWith('.pptx')
-    ) {
-      // For PowerPoint, we'll need to use a server-side approach
-      return processFileOnServer(file);
-    } else if (
-      fileType.includes('outlook') || 
-      fileName.endsWith('.pst') || 
-      fileName.endsWith('.ost')
-    ) {
-      // Extract email content for the model to process
-      return extractEmailContent(file);
-    } else if (
-      fileName.endsWith('.eml') ||
-      fileName.endsWith('.msg')
-    ) {
-      // Individual email files
-      return processFileOnServer(file);
-    } else if (file.name.match(/\.(html|css|js|jsx|ts|tsx|java|json|txt|md|c|cpp|h|hpp|py|rb|go|rs|php|sh|xml)$/i)) {
-      return await file.text();
-    } else {
-      // Try to process as text for unknown types
-      try {
-        return extractTextFromText(arrayBuffer);
-      } catch (e) {
-        return `Unsupported file type: ${fileType || fileName}`;
-      }
-    }
+    // Always delegate to the server 
+    return await processFileOnServer(file);
   } catch (error: any) {
-    console.error('Error processing file:', error);
-    return `Error processing file: ${error.message || 'Unknown error'}`;
+    console.error(`Error processing file ${file.name} via server:`, error);
+    // Provide a user-friendly error message that includes the filename
+    return `Error: Failed to process file '${file.name}' on server. ${error.message || 'Unknown server error'}`;
   }
 } 

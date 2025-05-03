@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
+  console.log('[API /openai] Received request');
   try {
     const { apiKey, model, messages, stream, max_tokens } = await req.json();
+    console.log(`[API /openai] Model: ${model}, Stream: ${stream}, Tokens: ${max_tokens}`);
     if (!apiKey || !model || !messages) {
+      console.error('[API /openai] Missing required fields');
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     // Montar request para OpenAI
@@ -38,6 +41,7 @@ export async function POST(req: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error: any) {
+    console.error('[API /openai] Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to call OpenAI' }, { status: 500 });
   }
 } 

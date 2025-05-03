@@ -21,8 +21,9 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
-  const { searchParams } = new URL(request.url)
+export async function POST(req: Request) {
+  console.log('[API /ollama] Received request');
+  const { searchParams } = new URL(req.url)
   const endpoint = searchParams.get('endpoint')
   
   if (!endpoint) {
@@ -30,7 +31,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json()
+    // Read the body ONCE
+    const body = await req.json(); 
+    console.log(`[API /ollama] Model: ${body.model}, Stream: ${body.stream}, Context: ${body.context_length}`);
+    
+    // Check properties from the body variable
+    if (!body.model || !body.prompt) {
+      console.error('[API /ollama] Missing required fields');
+      return NextResponse.json({ error: 'Missing required fields: model and prompt' }, { status: 400 });
+    }
+    
     const ollamaResponse = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -80,11 +90,8 @@ export async function POST(request: Request) {
     // If not streaming, return the full response
     const data = await ollamaResponse.json()
     return NextResponse.json(data)
-  } catch (error) {
-    console.error('Proxy error:', error)
-    return NextResponse.json(
-      { error: 'Failed to post to Ollama' },
-      { status: 500 }
-    )
+  } catch (error: any) {
+    console.error('[API /ollama] Error:', error);
+    return NextResponse.json({ error: error.message || 'Failed to call Ollama' }, { status: 500 });
   }
 } 
