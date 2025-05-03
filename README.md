@@ -47,21 +47,17 @@ GenieUI/
 ```bash
 # Clone the repository
 git clone https://github.com/alportblu/GenieUI.git
-cd GenieUI
+cd GenieUI\scripts
 
-# Install dependencies
-npm install
-# or
-yarn install
-```
+# run
+MacOS:
+./start.command
 
-### Running the Development Server
+Windows:
+start.bat
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+Linux:
+start.sh 
 
 Visit `http://localhost:3000` to view the application.
 
